@@ -161,8 +161,8 @@ bot.on("text", (ctx) => {
   }
 });
 
-// Start the bot (long polling)
-// Register commands so they appear in Telegram's UI (optional but helpful)
+// Register commands so they appear in Telegram's UI (optional but helpful).
+// Do NOT launch the bot here — the server (index.js) will set up webhooks and start the bot.
 (async () => {
   try {
     await bot.telegram.setMyCommands([
@@ -175,16 +175,9 @@ bot.on("text", (ctx) => {
   } catch (err) {
     // ignore setMyCommands errors in case of missing token during dev
   }
-
-  bot.launch()
-    .then(() => {
-      console.log("Bot is running...");
-    })
-    .catch((err) => {
-      console.error("Bot launch error:", err);
-      process.exitCode = 1;
-    });
 })();
+
+module.exports = bot;
 
 // Keep Render awake: ping self every 14 minutes (only for Web Service)
 if (process.env.RENDER_EXTERNAL_URL) {
@@ -200,6 +193,18 @@ if (process.env.RENDER_EXTERNAL_URL) {
   console.log('Keep-alive disabled (no RENDER_EXTERNAL_URL)')
 }
 
-// For clean exit
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+// For clean exit (safe: only call stop if bot is running)
+process.once("SIGINT", async () => {
+  try {
+    await bot.stop("SIGINT");
+  } catch (e) {
+    // ignore if bot not running
+  }
+});
+process.once("SIGTERM", async () => {
+  try {
+    await bot.stop("SIGTERM");
+  } catch (e) {
+    // ignore if bot not running
+  }
+});
