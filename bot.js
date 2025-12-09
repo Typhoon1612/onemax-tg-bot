@@ -141,7 +141,7 @@ bot.on("text", (ctx) => {
     }
 
     if (pageUrl) {
-      ctx.reply(`Tap the button to open ${pageLabel} module:`, {
+      ctx.reply(`Tap the button to open the ${pageLabel} module:`, {
         reply_markup: {
           inline_keyboard: [[{ text: `Open ${pageLabel}`, web_app: { url: pageUrl } }]],
         },
