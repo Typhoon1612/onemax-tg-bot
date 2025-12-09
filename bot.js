@@ -186,6 +186,20 @@ bot.on("text", (ctx) => {
     });
 })();
 
+// Keep Render awake: ping self every 14 minutes (only for Web Service)
+if (process.env.RENDER_EXTERNAL_URL) {
+  console.log('Keep-alive enabled. URL:', process.env.RENDER_EXTERNAL_URL)
+  setInterval(() => {
+    const now = new Date().toISOString()
+    fetch(process.env.RENDER_EXTERNAL_URL)
+      .then(res => console.log(`[${now}] Keep-alive ping: ${res.status}`))
+      .catch(err => console.log(`[${now}] Keep-alive error:`, err.message))
+  }, 14 * 60_000) // 14 minutes
+  console.log('Keep-alive timer started (every 14 min)')
+} else {
+  console.log('Keep-alive disabled (no RENDER_EXTERNAL_URL)')
+}
+
 // For clean exit
 process.once("SIGINT", () => bot.stop("SIGINT"));
 process.once("SIGTERM", () => bot.stop("SIGTERM"));
