@@ -177,22 +177,6 @@ bot.on("text", (ctx) => {
   }
 })();
 
-module.exports = bot;
-
-// Keep Render awake: ping self every 14 minutes (only for Web Service)
-if (process.env.RENDER_EXTERNAL_URL) {
-  console.log('Keep-alive enabled. URL:', process.env.RENDER_EXTERNAL_URL)
-  setInterval(() => {
-    const now = new Date().toISOString()
-    fetch(process.env.RENDER_EXTERNAL_URL)
-      .then(res => console.log(`[${now}] Keep-alive ping: ${res.status}`))
-      .catch(err => console.log(`[${now}] Keep-alive error:`, err.message))
-  }, 14 * 60_000) // 14 minutes
-  console.log('Keep-alive timer started (every 14 min)')
-} else {
-  console.log('Keep-alive disabled (no RENDER_EXTERNAL_URL)')
-}
-
 // For clean exit (safe: only call stop if bot is running)
 process.once("SIGINT", async () => {
   try {
@@ -208,3 +192,10 @@ process.once("SIGTERM", async () => {
     // ignore if bot not running
   }
 });
+
+// Start bot in polling mode for local testing
+bot.launch()
+  .then(() => console.log('Bot running in polling mode ✓'))
+  .catch(err => console.error('Failed to start bot:', err));
+
+module.exports = bot;

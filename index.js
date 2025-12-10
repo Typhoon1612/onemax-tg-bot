@@ -9,13 +9,13 @@ app.get("/", (req, res) => {
 });
 
 // Import Telegraf bot instance
-const bot = require("./bot");
+const navBot = require("./nav-bot");
 
 // Webhook path (keep it obscure)
-const PATH = `/bot${process.env.BOT_TOKEN}`;
+const PATH = `/nav-bot${process.env.BOT_TOKEN}`;
 
 // mount Telegraf webhook handler
-app.use(bot.webhookCallback(PATH));
+app.use(navBot.webhookCallback(PATH));
 
 app.listen(PORT, async () => {
   console.log("Server running on port " + PORT);
@@ -30,10 +30,25 @@ app.listen(PORT, async () => {
   const webhookUrl = `${PUBLIC_URL}${PATH}`;
   try {
     // remove any existing webhook and set the new one
-    await bot.telegram.deleteWebhook();
-    await bot.telegram.setWebhook(webhookUrl);
+    await navBot.telegram.deleteWebhook();
+    await navBot.telegram.setWebhook(webhookUrl);
     console.log('Webhook set to', webhookUrl);
   } catch (err) {
     console.error('Failed to set webhook:', err);
   }
 });
+
+// Keep Render awake: ping self every 14 minutes (only for Web Service)
+if (process.env.RENDER_EXTERNAL_URL) {
+  console.log('Keep-alive enabled. URL:', process.env.RENDER_EXTERNAL_URL)
+  setInterval(() => {
+    const now = new Date().toISOString()
+    fetch(process.env.RENDER_EXTERNAL_URL)
+      .then(res => console.log(`[${now}] Keep-alive ping: ${res.status}`))
+      .catch(err => console.log(`[${now}] Keep-alive error:`, err.message))
+  }, 14 * 60_000) // 14 minutes
+  console.log('Keep-alive timer started (every 14 min)')
+} else {
+  console.log('Keep-alive disabled (no RENDER_EXTERNAL_URL)')
+}
+
