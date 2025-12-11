@@ -14,6 +14,15 @@ require("dotenv").config();
 // HTTP client used to call the CoinMarketCap API
 const axios = require("axios");
 
+// Telegraf framework for Telegram bot functionality
+const { Telegraf } = require("telegraf");
+
+// Read token from .env
+const bot = new Telegraf(process.env.BOT_TOKEN);
+
+// Read Chat ID from .env
+const CHAT_ID = process.env.CHAT_ID;
+
 // --- Configuration -----------------------------------------------------
 // Read the CoinMarketCap API key from environment variables. This key is
 // required to call the CMC pro endpoints.
@@ -95,10 +104,13 @@ async function fetchCryptoToken(symbol) {
 }
 
 async function check1hPriceChange() {
+  const lines = [];
   for (const symbol of cryptoSymbols) {
     const data = await fetchCryptoToken(symbol);
     if (!data) {
-      console.log(`${symbol}: No data returned`);
+      const line = `${symbol}: No data returned`;
+      console.log(line);
+      lines.push(line);
       continue; // try next symbol instead of stopping the whole loop
     }
 
@@ -112,93 +124,141 @@ async function check1hPriceChange() {
     const p1hNum = Number(t.percent_change_1h);
     const p1hStr = !Number.isNaN(p1hNum) ? `${p1hNum.toFixed(2)}%` : "N/A";
 
-
     const priceStr = t.price ? `$${t.price.toFixed(2)}` : "N/A";
 
-    if (!Number.isNaN(p1hNum) && p1hNum >= 0) {
-      console.log(`${symbol}: 1h change is positive: ${p1hStr} the price now is ${priceStr}`);
-	} else {
-		return;
-	}
+    const line = `${symbol}: ${priceStr} | 1h: ${p1hStr}`;
+    console.log(line);
+    lines.push(line);
+
+    if (!Number.isNaN(p1hNum) && (p1hNum >= 5 || p1hNum <= 5)) {
+      const extra = `${symbol}: 1h change is positive: ${p1hStr} the price now is ${priceStr}`;
+      console.log(extra);
+      lines.push(extra);
+      continue;
+    } else {
+      continue;
+    }
+  }
+
+  // Send summary to Telegram if configured
+  try {
+    if (bot && CHAT_ID && lines.length > 0) {
+      const text = `1h price check:\n${lines.join("\n")}`;
+      await bot.telegram.sendMessage(CHAT_ID, text);
+    }
+  } catch (err) {
+    console.error(
+      "Failed to send 1h summary to Telegram:",
+      err?.response?.description || err?.message || err
+    );
   }
 }
 
-async function post24hPriceChange() { 
-	// Randomly Generate a number according to Length of cryptoSymbols
-	const randomIndex = Math.floor(Math.random() * cryptoSymbols.length);
-	const symbol = cryptoSymbols[randomIndex];
-	const data = await fetchCryptoToken(symbol);
-	if (!data) {
-	  console.log(`${symbol}: No data returned`);
-	  return; // try next symbol instead of stopping the whole loop
-	}
-	// Print a concise line per token: Price, 1h %, 24h %
-	const t = data;
-	if (!t) {
-	  console.log(`${symbol}: no data`);
-	  return;
-	}
-	const p24Str =
+async function post24hPriceChange() {
+  // Randomly Generate a number according to Length of cryptoSymbols
+  const randomIndex = Math.floor(Math.random() * cryptoSymbols.length);
+  const symbol = cryptoSymbols[randomIndex];
+  const data = await fetchCryptoToken(symbol);
+  if (!data) {
+    console.log(`${symbol}: No data returned`);
+    return; // try next symbol instead of stopping the whole loop
+  }
+  // Print a concise line per token: Price, 1h %, 24h %
+  const t = data;
+  if (!t) {
+    console.log(`${symbol}: no data`);
+    return;
+  }
+  const p24Str =
     t.percent_change_24h !== null &&
     t.percent_change_24h !== undefined &&
     !Number.isNaN(Number(t.percent_change_24h))
       ? `${Number(t.percent_change_24h).toFixed(2)}%`
-			: "N/A";
-	
-	console.log(`${symbol}: 24h change is ${p24Str}`);
-}
+      : "N/A";
 
-async function run() {
-	await check1hPriceChange();
-	await post24hPriceChange();
-  // // Default tokens for quick testing: BTC, ETH, TRX
-  // const data = await fetchCryptoToken(cryptoSymbols[s]);
-  // if (!data) {
-  //   console.log("No data returned");
-  //   process.exit(0);
-  // }
+  console.log(`${symbol}: 24h change is ${p24Str}`);
 
-  // //   check1hPricePercentgeChange();
-
-  // // Print a concise line per token: Price, 1h %, 24h %
-
-  // const t = data[s];
-  // if (!t) {
-  //   console.log(`${s}: no data`);
-  //   continue;
-  // }
-  // const priceStr = t.price ? `$${t.price.toFixed(2)}` : "N/A";
-  // const p1hStr =
-  //   t.percent_change_1h !== null &&
-  //   t.percent_change_1h !== undefined &&
-  //   !Number.isNaN(Number(t.percent_change_1h))
-  //     ? `${Number(t.percent_change_1h).toFixed(2)}%`
-  //     : "N/A";
-  // const p24Str =
-  //   t.percent_change_24h !== null &&
-  //   t.percent_change_24h !== undefined &&
-  //   !Number.isNaN(Number(t.percent_change_24h))
-  //     ? `${Number(t.percent_change_24h).toFixed(2)}%`
-  //     : "N/A";
-  // console.log(`${s}: ${priceStr} | 1h: ${p1hStr} | 24h: ${p24Str}`);
-
-  process.exit(0);
+  // Send summary to Telegram if configured
+  try {
+    if (bot && CHAT_ID) {
+      const msg = `${symbol}: 24h change is ${p24Str}`;
+      await bot.telegram.sendMessage(CHAT_ID, msg);
+    }
+  } catch (err) {
+    console.error(
+      "Failed to send 24h summary to Telegram:",
+      err?.response?.description || err?.message || err
+    );
+  }
 }
 
 // --- CLI / direct-run behavior ----------------------------------------
 // When the file is executed directly (`node price-bot.js`) show a single
 // line with BTC price, 1h and 24h percentage changes, then exit.
-if (require.main === module) {
-  run();
+/**
+ * startScheduler()
+ * Starts recurring tasks:
+ * - `check1hPriceChange()` every 15 minutes
+ * - `post24hPriceChange()` every 6 hours
+ * The function performs an immediate run of both tasks, then schedules
+ * the recurring calls. It also listens for SIGINT / SIGTERM to clean up.
+ */
+function startScheduler() {
+  console.log(
+    "Starting scheduler: `check1hPriceChange` every 15 minutes, `post24hPriceChange` every 6 hours"
+  );
+
+  // Run once immediately
+  check1hPriceChange().catch((err) =>
+    console.error("Initial check1hPriceChange failed:", err)
+  );
+  post24hPriceChange().catch((err) =>
+    console.error("Initial post24hPriceChange failed:", err)
+  );
+
+  // const FIFTEEN_MIN = 15 * 60 * 1000;
+  // const SIX_HOURS = 6 * 60 * 60 * 1000;
+  const FIFTEEN_MIN = 1 * 60 * 1000; // for testing, every 1 minute
+  const SIX_HOURS = 1 * 60 * 1000; // for testing, every 1 minutes
+
+  const interval1 = setInterval(() => {
+    check1hPriceChange().catch((err) =>
+      console.error("check1hPriceChange error:", err)
+    );
+  }, FIFTEEN_MIN);
+
+  const interval2 = setInterval(() => {
+    post24hPriceChange().catch((err) =>
+      console.error("post24hPriceChange error:", err)
+    );
+  }, SIX_HOURS);
+
+  function stop() {
+    console.log("Stopping scheduler...");
+    clearInterval(interval1);
+    clearInterval(interval2);
+    process.exit(0);
+  }
+
+  process.on("SIGINT", stop);
+  process.on("SIGTERM", stop);
 }
 
 // Start bot in polling mode for local testing
-// bot
-//   .launch()
-//   .then(() => console.log("Bot running in polling mode ✓"))
-//   .catch((err) => console.error("Failed to start bot:", err));
 
 // --- Module exports ---------------------------------------------------
 // Export the fetchBTC function so other modules can import and reuse it.
 // Export both the fetch helper and the runnable `run` function for reuse.
-module.exports = { fetchCryptoToken, run };
+// Export the helpers and the scheduler so other modules can control behavior
+// Attach helpers onto the Telegraf bot instance so other modules can use
+// the same pattern as `nav-bot.js` (require returns a bot instance).
+try {
+  bot.fetchCryptoToken = fetchCryptoToken;
+  bot.check1hPriceChange = check1hPriceChange;
+  bot.post24hPriceChange = post24hPriceChange;
+  bot.startScheduler = startScheduler;
+} catch (e) {
+  // ignore if bot not available for some reason
+}
+
+module.exports = bot;

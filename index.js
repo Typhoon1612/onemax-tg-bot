@@ -10,6 +10,8 @@ app.get("/", (req, res) => {
 
 // Import Telegraf bot instance
 const navBot = require("./nav-bot");
+// Import price-bot so we can start its scheduler
+const priceBot = require("./price-bot");
 
 // Webhook path (keep it obscure)
 const PATH = `/nav-bot${process.env.BOT_TOKEN}`;
@@ -21,9 +23,14 @@ app.listen(PORT, async () => {
   console.log("Server running on port " + PORT);
 
   // Determine public URL for webhook registration
-  const PUBLIC_URL = process.env.RENDER_EXTERNAL_URL || process.env.APP_URL || process.env.PUBLIC_URL;
+  const PUBLIC_URL =
+    process.env.RENDER_EXTERNAL_URL ||
+    process.env.APP_URL ||
+    process.env.PUBLIC_URL;
   if (!PUBLIC_URL) {
-    console.warn('No PUBLIC_URL/APP_URL/RENDER_EXTERNAL_URL set — webhook not registered automatically. Set APP_URL env var to your service URL.');
+    console.warn(
+      "No PUBLIC_URL/APP_URL/RENDER_EXTERNAL_URL set — webhook not registered automatically. Set APP_URL env var to your service URL."
+    );
     return;
   }
 
@@ -32,23 +39,32 @@ app.listen(PORT, async () => {
     // remove any existing webhook and set the new one
     await navBot.telegram.deleteWebhook();
     await navBot.telegram.setWebhook(webhookUrl);
-    console.log('Webhook set to', webhookUrl);
+    console.log("Webhook set to", webhookUrl);
   } catch (err) {
-    console.error('Failed to set webhook:', err);
+    console.error("Failed to set webhook:", err);
   }
 });
 
-// Keep Render awake: ping self every 14 minutes (only for Web Service)
-if (process.env.RENDER_EXTERNAL_URL) {
-  console.log('Keep-alive enabled. URL:', process.env.RENDER_EXTERNAL_URL)
-  setInterval(() => {
-    const now = new Date().toISOString()
-    fetch(process.env.RENDER_EXTERNAL_URL)
-      .then(res => console.log(`[${now}] Keep-alive ping: ${res.status}`))
-      .catch(err => console.log(`[${now}] Keep-alive error:`, err.message))
-  }, 14 * 60_000) // 14 minutes
-  console.log('Keep-alive timer started (every 14 min)')
-} else {
-  console.log('Keep-alive disabled (no RENDER_EXTERNAL_URL)')
+// Start price scheduler
+try {
+  if (priceBot && typeof priceBot.startScheduler === "function") {
+    priceBot.startScheduler();
+    console.log("Price scheduler started");
+  }
+} catch (err) {
+  console.error("Failed to start price scheduler:", err?.message || err);
 }
 
+// Keep Render awake: ping self every 14 minutes (only for Web Service)
+if (process.env.RENDER_EXTERNAL_URL) {
+  console.log("Keep-alive enabled. URL:", process.env.RENDER_EXTERNAL_URL);
+  setInterval(() => {
+    const now = new Date().toISOString();
+    fetch(process.env.RENDER_EXTERNAL_URL)
+      .then((res) => console.log(`[${now}] Keep-alive ping: ${res.status}`))
+      .catch((err) => console.log(`[${now}] Keep-alive error:`, err.message));
+  }, 14 * 60_000); // 14 minutes
+  console.log("Keep-alive timer started (every 14 min)");
+} else {
+  console.log("Keep-alive disabled (no RENDER_EXTERNAL_URL)");
+}

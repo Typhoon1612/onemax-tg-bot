@@ -4,129 +4,167 @@ const { Telegraf } = require("telegraf");
 // Read token from .env
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
-
 // /start command
 bot.start((ctx) => {
-  ctx.reply(
-    `Welcome to 1MAX.com
-    Available commands:
-    /start - Start the bot
-    /register - Open register module
-    /deposit - Open deposit module
-    /quest - Open quest module
-    /help - Show this help`
-  );
+  try {
+    ctx.reply(
+      `Welcome to 1MAX.com. I am 1Max Mini App Bot 🤖.\n\nClick @onemaxapp_bot to start`
+    );
+  } catch (err) {
+    console.error("Failed to reply to /start:", err?.message || err);
+  }
 });
- 
+
 // /register command
 bot.command("register", (ctx) => {
+  const isPrivate = ctx.chat && ctx.chat.type === "private";
+  if (!isPrivate) return; // only respond in private chats
+
   // This URL will open your site directly on the register page
   const registerUrl = `https://www.1max.com/en_US/register`;
 
-  ctx.reply("Tap the button to open the register module:", {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "Open Register",
-            web_app: {
-              url: registerUrl,
-            },
-          },
+  try {
+    ctx.reply("Tap the button to open the register module:", {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "Open Register", web_app: { url: registerUrl } }],
         ],
-      ],
-    },
-  });
+      },
+    });
+  } catch (err) {
+    console.error(
+      "Failed to send register button:",
+      err?.response?.description || err?.message || err
+    );
+  }
 });
 
 // /quest command
 bot.command("quest", (ctx) => {
+  const isPrivate = ctx.chat && ctx.chat.type === "private";
+  if (!isPrivate) return; // only respond in private chats
+
   const questUrl = `https://quest.1max.com`;
 
-  ctx.reply("Tap the button to open the quest module:", {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "Open Quest",
-            web_app: {
-              url: questUrl,
-            },
-          },
-        ],
-      ],
-    },
-  });
+  try {
+    ctx.reply("Tap the button to open the quest module:", {
+      reply_markup: {
+        inline_keyboard: [[{ text: "Open Quest", web_app: { url: questUrl } }]],
+      },
+    });
+  } catch (err) {
+    console.error(
+      "Failed to send quest button:",
+      err?.response?.description || err?.message || err
+    );
+  }
 });
 
 // /deposit command (example of reading arguments)
 bot.command("deposit", (ctx) => {
+  const isPrivate = ctx.chat && ctx.chat.type === "private";
+  if (!isPrivate) return; // only respond in private chats
   // If user typed: /deposit 100
-//   const text = ctx.message && ctx.message.text ? ctx.message.text : "";
-//   const parts = text.split(" ").filter((p) => p.length > 0);
-//   const amount = parts[1] || null; // second token is amount, if provided
+  //   const text = ctx.message && ctx.message.text ? ctx.message.text : "";
+  //   const parts = text.split(" ").filter((p) => p.length > 0);
+  //   const amount = parts[1] || null; // second token is amount, if provided
 
   // This URL will open your site on the deposit page
   const depositUrl = `https://www.1max.com/en_US/assets/recharge`;
 
-//   if (amount) {
-//     ctx.reply(`You requested to deposit: ${amount}. Opening deposit module...`);
-//   }
+  //   if (amount) {
+  //     ctx.reply(`You requested to deposit: ${amount}. Opening deposit module...`);
+  //   }
 
-  ctx.reply("Tap the button to open the deposit module:", {
-    reply_markup: {
-      inline_keyboard: [
-        [
-          {
-            text: "Open Deposit",
-            web_app: {
-              url: depositUrl,
-            },
-          },
+  try {
+    ctx.reply("Tap the button to open the deposit module:", {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "Open Deposit", web_app: { url: depositUrl } }],
         ],
-      ],
-    },
-  });
+      },
+    });
+  } catch (err) {
+    console.error(
+      "Failed to send deposit button:",
+      err?.response?.description || err?.message || err
+    );
+  }
+});
+
+// /deposit command (example of reading arguments)
+bot.command("download", (ctx) => {
+  const isPrivate = ctx.chat && ctx.chat.type === "private";
+  if (!isPrivate) return; // only respond in private chats
+  // If user typed: /deposit 100
+  //   const text = ctx.message && ctx.message.text ? ctx.message.text : "";
+  //   const parts = text.split(" ").filter((p) => p.length > 0);
+  //   const amount = parts[1] || null; // second token is amount, if provided
+
+  // This URL will open your site on the deposit page
+
+  //   if (amount) {
+  //     ctx.reply(`You requested to deposit: ${amount}. Opening deposit module...`);
+  //   }
+
+  try {
+    ctx.reply(`https://capp-build.oss-cn-hangzhou.aliyuncs.com/1MAX/1MAX_Release_6.4.9_6030016.apk`);
+  } catch (err) {
+    console.error(
+      "Failed to send download button:",
+      err?.response?.description || err?.message || err
+    );
+  }
 });
 
 // /help command
 bot.command("help", (ctx) => {
-  ctx.reply(
-    `Available commands:
+  const isPrivate = ctx.chat && ctx.chat.type === "private";
+  if (!isPrivate) return; // ignore in groups/channels
+
+  try {
+    ctx.reply(
+      `Available commands:
     /start - Start the bot
     /register - Open register module
     /deposit - Open deposit module
     /quest - Open quest module
     /help - Show this help`
-  );
+    );
+  } catch (err) {
+    console.error("Failed to reply to /help:", err?.message || err);
+  }
 });
 
 // Handle plain text messages (non-slash input)
 bot.on("text", (ctx) => {
+  const isPrivate = ctx.chat && ctx.chat.type === "private";
+  if (!isPrivate) return; // ignore plain text in groups
+
   const text = ctx.message.text.trim();
 
   // Example: allow users to type "deposit 50" without slash
   const tokens = text.split(/\s+/);
   const first = tokens[0].toLowerCase();
 
-//   if (first === "deposit") {
-//     const amount = tokens[1] || null;
-//     const depositUrl = `${ONEMAX_BASE_URL}/deposit`;
-//     if (amount) ctx.reply(`Got deposit amount: ${amount}. Opening deposit...`);
-//     ctx.reply("Tap the button to open the Deposit module:", {
-//       reply_markup: {
-//         inline_keyboard: [
-//           [
-//             {
-//               text: "Open Deposit",
-//               web_app: { url: depositUrl },
-//             },
-//           ],
-//         ],
-//       },
-//     });
-//     return;
-//   }
+  //   if (first === "deposit") {
+  //     const amount = tokens[1] || null;
+  //     const depositUrl = `${ONEMAX_BASE_URL}/deposit`;
+  //     if (amount) ctx.reply(`Got deposit amount: ${amount}. Opening deposit...`);
+  //     ctx.reply("Tap the button to open the Deposit module:", {
+  //       reply_markup: {
+  //         inline_keyboard: [
+  //           [
+  //             {
+  //               text: "Open Deposit",
+  //               web_app: { url: depositUrl },
+  //             },
+  //           ],
+  //         ],
+  //       },
+  //     });
+  //     return;
+  //   }
 
   // allow "register" and "quest" as plain text too
   if (first === "register" || first === "quest" || first === "deposit") {
@@ -143,7 +181,9 @@ bot.on("text", (ctx) => {
     if (pageUrl) {
       ctx.reply(`Tap the button to open the ${pageLabel} module:`, {
         reply_markup: {
-          inline_keyboard: [[{ text: `Open ${pageLabel}`, web_app: { url: pageUrl } }]],
+          inline_keyboard: [
+            [{ text: `Open ${pageLabel}`, web_app: { url: pageUrl } }],
+          ],
         },
       });
     } else {
@@ -165,13 +205,24 @@ bot.on("text", (ctx) => {
 // Do NOT launch the bot here — the server (index.js) will set up webhooks and start the bot.
 (async () => {
   try {
-    await bot.telegram.setMyCommands([
-      { command: "start", description: "Start the bot" },
-      { command: "register", description: "Open register module" },
-      { command: "deposit", description: "Open deposit module" },
-      { command: "quest", description: "Open quest module" },
-      { command: "help", description: "Show help" },
-    ]);
+    const isPrivate = ctx.chat && ctx.chat.type === "private";
+    if (!isPrivate) {
+      // ignore plain text in groups
+      await bot.telegram.setMyCommands([]);
+      return;
+    }
+    // Register commands only for private chats so the menu doesn't appear in groups
+    await bot.telegram.setMyCommands(
+      [
+        { command: "start", description: "Start the bot" },
+        { command: "register", description: "Open register module" },
+        { command: "deposit", description: "Open deposit module" },
+        { command: "quest", description: "Open quest module" },
+        { command: "help", description: "Show help" },
+      ],
+      { scope: { type: "all_private_chats" } }
+    );
+    console.log("Commands cleared and private-only commands registered.");
   } catch (err) {
     // ignore setMyCommands errors in case of missing token during dev
   }
@@ -194,8 +245,11 @@ process.once("SIGTERM", async () => {
 });
 
 // Start bot in polling mode for local testing
-bot.launch()
-  .then(() => console.log('Bot running in polling mode ✓'))
-  .catch(err => console.error('Failed to start bot:', err));
+bot
+  .launch()
+  .then(() => console.log("Bot running in polling mode ✓"))
+  .catch((err) => console.error("Failed to start bot:", err));
 
 module.exports = bot;
+
+
