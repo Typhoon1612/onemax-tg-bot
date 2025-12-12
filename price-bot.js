@@ -216,10 +216,8 @@ function startScheduler() {
     console.error("Initial post24hPriceChange failed:", err)
   );
 
-  // const FIFTEEN_MIN = 15 * 60 * 1000;
-  // const SIX_HOURS = 6 * 60 * 60 * 1000;
-  const FIFTEEN_MIN = 1 * 60 * 1000; // for testing, every 1 minute
-  const SIX_HOURS = 1 * 60 * 1000; // for testing, every 1 minutes
+  const FIFTEEN_MIN = 15 * 60 * 1000;
+  const SIX_HOURS = 6 * 60 * 60 * 1000;
 
   const interval1 = setInterval(() => {
     check1hPriceChange().catch((err) =>
