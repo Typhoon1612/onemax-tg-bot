@@ -99,16 +99,17 @@ If you want the scheduled price checks to run in a separate container (recommend
 services:
   bot:
     build: .
-    env_file: [ .env ]
-    ports: [ "3000:3000" ]
+    env_file: [.env]
+    ports: ["3000:3000"]
   worker:
     build: .
-    env_file: [ .env ]
+    env_file: [.env]
     command: node price-bot.js
     restart: unless-stopped
 ```
 
 Notes:
+
 - Provide required env vars in `.env`: `BOT_TOKEN`, `CMC_API_KEY`, `CHAT_ID`.
 - Ensure `price-bot.js` will start the scheduler when executed directly (add `if (require.main === module) startScheduler();` at the bottom) if you use the `worker` service.
 - Do not commit `.env` to source control.
