@@ -126,11 +126,11 @@ async function check1hPriceChange() {
 
     const priceStr = t.price ? `$${t.price.toFixed(2)}` : "N/A";
 
-    const line = `${symbol}: ${priceStr} | 1h: ${p1hStr}`;
-    console.log(line);
-    lines.push(line);
+    // const line = `${symbol}: ${priceStr} | 1h: ${p1hStr}`;
+    // console.log(line);
+    // lines.push(line);
 
-    if (!Number.isNaN(p1hNum) && (p1hNum >= 5 || p1hNum <= -5)) {
+    if (!Number.isNaN(p1hNum) && (p1hNum >= 0 || p1hNum <= 0)) {
       const extra = `${symbol}: 1h change is positive: ${p1hStr} the price now is ${priceStr}`;
       console.log(extra);
       lines.push(extra);
@@ -216,8 +216,9 @@ function startScheduler() {
     console.error("Initial post24hPriceChange failed:", err)
   );
 
-  const FIFTEEN_MIN = 15 * 60 * 1000;
+  // const FIFTEEN_MIN = 15 * 60 * 1000;
   const SIX_HOURS = 6 * 60 * 60 * 1000;
+  const FIFTEEN_MIN = 1 * 60 * 1000; // For testing, every 1 minute
 
   const interval1 = setInterval(() => {
     check1hPriceChange().catch((err) =>
