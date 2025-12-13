@@ -130,7 +130,7 @@ async function check1hPriceChange() {
     console.log(line);
     lines.push(line);
 
-    if (!Number.isNaN(p1hNum) && (p1hNum >= 5 || p1hNum <= 5)) {
+    if (!Number.isNaN(p1hNum) && (p1hNum >= 5 || p1hNum <= -5)) {
       const extra = `${symbol}: 1h change is positive: ${p1hStr} the price now is ${priceStr}`;
       console.log(extra);
       lines.push(extra);
