@@ -1,0 +1,20 @@
+version: "3.8"
+services:
+  bot:
+    build: .
+    container_name: onemax-bot
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    # Optionally mount a volume during development to pick up source changes
+    # volumes:
+    #   - ./:/usr/src/app:delegated
+# If you want a separate worker for scheduled tasks, you can add a second service
+# worker:
+#   build: .
+#   command: node price-bot.js
+#   env_file:
+#     - .env
+#   restart: unless-stopped
