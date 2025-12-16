@@ -7,9 +7,18 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 // /start command
 bot.start((ctx) => {
   try {
-    ctx.reply(
-      `Welcome to 1MAX.com. I am 1Max Mini App Bot 🤖.\n\nClick @onemaxapp_bot to start.\n\nAvailable commands:\n/register - Open register module\n/deposit - Open deposit module\n/quest - Open quest\n/help - Show help`
-    );
+    ctx.reply(`Welcome to the 1MAX Mini App!😁
+
+Press or type to get started:
+📲 /download – Get the 1MAX app (Android & iOS)
+🎯 /quest – Complete quests & earn rewards
+📝 /register – Create your 1MAX account
+💰 /deposit – Deposit funds to start trading
+💬 /discord – Join our Discord community
+🛠 /support – Get help, support, or partnership info
+❓/help – Show available commands
+
+👉 Tap “Launch” to start trading on 1MAX😄`);
   } catch (err) {
     console.error("Failed to reply to /start:", err?.message || err);
   }
@@ -24,10 +33,10 @@ bot.command("register", (ctx) => {
   const registerUrl = `https://www.1max.com/en_US/register`;
 
   try {
-    ctx.reply("Tap the button to open the register module:", {
+    ctx.reply("Sign up on 1MAX", {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "Open Register", web_app: { url: registerUrl } }],
+          [{ text: "Click to Register", web_app: { url: registerUrl } }],
         ],
       },
     });
@@ -47,9 +56,11 @@ bot.command("quest", (ctx) => {
   const questUrl = `https://quest.1max.com`;
 
   try {
-    ctx.reply("Tap the button to open the quest module:", {
+    ctx.reply("Ready to earn? Tap below and start completing quests👇", {
       reply_markup: {
-        inline_keyboard: [[{ text: "Open Quest", web_app: { url: questUrl } }]],
+        inline_keyboard: [
+          [{ text: "Start Quest", web_app: { url: questUrl } }],
+        ],
       },
     });
   } catch (err) {
@@ -77,10 +88,10 @@ bot.command("deposit", (ctx) => {
   //   }
 
   try {
-    ctx.reply("Tap the button to open the deposit module:", {
+    ctx.reply("Deposit funds to begin trading on 1MAX 👇", {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "Open Deposit", web_app: { url: depositUrl } }],
+          [{ text: "Start Deposit", web_app: { url: depositUrl } }],
         ],
       },
     });
@@ -92,34 +103,164 @@ bot.command("deposit", (ctx) => {
   }
 });
 
-// /deposit command (example of reading arguments)
+bot.command("discord", (ctx) => {
+  const isPrivate = ctx.chat && ctx.chat.type === "private";
+  if (!isPrivate) return; // only respond in private chats
+
+  // This URL will open your site on the deposit page
+  const discordUrl = `https://discord.gg/jU4FsV4M7v`;
+
+  try {
+    ctx.reply("Enter the 1MAX Discord community 👇", {
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "Join Discord", web_app: { url: discordUrl } }],
+        ],
+      },
+    });
+  } catch (err) {
+    console.error(
+      "Failed to send deposit button:",
+      err?.response?.description || err?.message || err
+    );
+  }
+});
+
+bot.command("support", (ctx) => {
+  const isPrivate = ctx.chat && ctx.chat.type === "private";
+  if (!isPrivate) return; // only respond in private chats
+  try {
+    ctx.reply(`Need help or have feedback? We’ve got you covered✅
+📧 Support & issues: support@1max.com
+🤝 Partnerships: partnerships@1max.com`);
+  } catch (err) {
+    console.error(
+      "Failed to send support info:",
+      err?.response?.description || err?.message || err
+    );
+  }
+});
+
+// /download command
+// Shows an inline keyboard asking the user to choose Android or iOS.
+// The buttons use `callback_data` so the bot will receive an action
+// and can edit the message to show the appropriate download link.
 bot.command("download", (ctx) => {
   const isPrivate = ctx.chat && ctx.chat.type === "private";
   if (!isPrivate) return; // only respond in private chats
-  // If user typed: /deposit 100
-  //   const text = ctx.message && ctx.message.text ? ctx.message.text : "";
-  //   const parts = text.split(" ").filter((p) => p.length > 0);
-  //   const amount = parts[1] || null; // second token is amount, if provided
 
-  // This URL will open your site on the deposit page
-
-  //   if (amount) {
-  //     ctx.reply(`You requested to deposit: ${amount}. Opening deposit module...`);
-  //   }
+  const keyboard = {
+    reply_markup: {
+      inline_keyboard: [
+        [
+          { text: "Android", callback_data: "download_android" },
+          { text: "iOS", callback_data: "download_ios" },
+        ],
+      ],
+    },
+  };
 
   try {
-    ctx.reply(`
-    Android App Download Link:\n
-    https://capp-build.oss-cn-hangzhou.aliyuncs.com/1MAX/1MAX_Release_6.4.9_6030016.apk
-    \n\n
-    iOS App Download Link:\n
-    https://testflight.apple.com/join/BUWC6Bjf
-    `);
+    ctx.reply("Install our apps today:", keyboard);
   } catch (err) {
     console.error(
-      "Failed to send download button:",
+      "Failed to send download options:",
       err?.response?.description || err?.message || err
     );
+  }
+});
+
+// Callback handlers for download flow
+// These constants hold the target download URLs for each platform.
+const ANDROID_URL =
+  "https://capp-build.oss-cn-hangzhou.aliyuncs.com/1MAX/1MAX_Release_6.4.9_6030016.apk";
+const IOS_URL = "https://testflight.apple.com/join/BUWC6Bjf";
+
+// Handler: user tapped the Android button
+// - verifies chat is private, then edits the original message to show
+//   the Android download link and a Back button (keeps the UI tidy).
+bot.action("download_android", async (ctx) => {
+  try {
+    const isPrivate = ctx.chat && ctx.chat.type === "private";
+    if (!isPrivate) return ctx.answerCbQuery();
+
+    const opts = {
+      reply_markup: {
+        inline_keyboard: [[{ text: "Back", callback_data: "download_back" }]],
+      },
+    };
+
+    if (ctx.updateType === "callback_query") {
+      await ctx.editMessageText(
+        `This is your Android Download Link\n${ANDROID_URL}`,
+        opts
+      );
+      await ctx.answerCbQuery();
+    } else {
+      await ctx.reply(
+        `This is your Android Download Link\n${ANDROID_URL}`,
+        opts
+      );
+    }
+  } catch (err) {
+    console.error("download_android handler failed:", err?.message || err);
+  }
+});
+
+// Handler: user tapped the iOS button
+// - verifies chat is private, then edits the original message to show
+//   the iOS/TestFlight link and a Back button.
+bot.action("download_ios", async (ctx) => {
+  try {
+    const isPrivate = ctx.chat && ctx.chat.type === "private";
+    if (!isPrivate) return ctx.answerCbQuery();
+
+    const opts = {
+      reply_markup: {
+        inline_keyboard: [[{ text: "Back", callback_data: "download_back" }]],
+      },
+    };
+
+    if (ctx.updateType === "callback_query") {
+      await ctx.editMessageText(
+        `This is your iOS Download Link\n${IOS_URL}`,
+        opts
+      );
+      await ctx.answerCbQuery();
+    } else {
+      await ctx.reply(`This is your iOS Download Link\n${IOS_URL}`, opts);
+    }
+  } catch (err) {
+    console.error("download_ios handler failed:", err?.message || err);
+  }
+});
+
+// Handler: user tapped Back
+// - returns the message to the initial choice screen with Android/iOS buttons
+bot.action("download_back", async (ctx) => {
+  try {
+    const isPrivate = ctx.chat && ctx.chat.type === "private";
+    if (!isPrivate) return ctx.answerCbQuery();
+
+    const keyboard = {
+      reply_markup: {
+        inline_keyboard: [
+          [
+            { text: "Android", callback_data: "download_android" },
+            { text: "iOS", callback_data: "download_ios" },
+          ],
+        ],
+      },
+    };
+
+    if (ctx.updateType === "callback_query") {
+      await ctx.editMessageText("Choose one type to install:", keyboard);
+      await ctx.answerCbQuery();
+    } else {
+      await ctx.reply("Choose one type to install:", keyboard);
+    }
+  } catch (err) {
+    console.error("download_back handler failed:", err?.message || err);
   }
 });
 
@@ -129,14 +270,16 @@ bot.command("help", (ctx) => {
   if (!isPrivate) return; // ignore in groups/channels
 
   try {
-    ctx.reply(
-      `Available commands:
-    /start - Start the bot
-    /register - Open register module
-    /deposit - Open deposit module
-    /quest - Open quest module
-    /help - Show this help`
-    );
+    ctx.reply(`Press or type to get started:
+📲 /download – Get the 1MAX app (Android & iOS)
+🎯 /quest – Complete quests & earn rewards
+📝 /register – Create your 1MAX account
+💰 /deposit – Deposit funds to start trading
+💬 /discord – Join our Discord community
+🛠 /support – Get help, support, or partnership info
+❓ /help – Show available commands
+
+👉 Tap “Launch” to start trading on 1MAX😄`);
   } catch (err) {
     console.error("Failed to reply to /help:", err?.message || err);
   }
@@ -221,6 +364,7 @@ bot.on("text", (ctx) => {
     await bot.telegram.setMyCommands(
       [
         { command: "start", description: "Start the bot" },
+        { command: "download", description: "Get app download links" },
         { command: "register", description: "Open register module" },
         { command: "deposit", description: "Open deposit module" },
         { command: "quest", description: "Open quest module" },
@@ -257,5 +401,3 @@ bot
   .catch((err) => console.error("Failed to start bot:", err));
 
 module.exports = bot;
-
-
