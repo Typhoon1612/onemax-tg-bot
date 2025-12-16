@@ -8,8 +8,7 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 bot.start((ctx) => {
   try {
     ctx.reply(
-      `Welcome to 1MAX.com. I am 1Max Mini App Bot 🤖.\n\nClick @onemaxapp_bot to start.\n\n
-      Available commands:\n/register - Open register module\n/deposit - Open deposit module\n/quest - Open quest\n/help - Show help`
+      `Welcome to 1MAX.com. I am 1Max Mini App Bot 🤖.\n\nClick @onemaxapp_bot to start.\n\nAvailable commands:\n/register - Open register module\n/deposit - Open deposit module\n/quest - Open quest\n/help - Show help`
     );
   } catch (err) {
     console.error("Failed to reply to /start:", err?.message || err);
