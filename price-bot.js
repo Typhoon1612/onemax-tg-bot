@@ -34,7 +34,27 @@ if (!CMC_API_KEY) {
   process.exit(1);
 }
 
-const cryptoSymbols = ["BTC", "ETH", "TRX"];
+const cryptoSymbols = [
+  "BTC",
+  "ETH",
+  "SOL",
+  "XRP",
+  "TRX",
+  "SUI",
+  "LTC",
+  "PEPE",
+  "DOGE",
+  "BNB",
+  "ATOM",
+  "UNI",
+  "DOT",
+  "FLOKI",
+  "ADA",
+  "ENA",
+  "LINK",
+  "XLM",
+  "POL",
+];
 
 // --- Data fetching helper ---------------------------------------------
 /**
