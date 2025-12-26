@@ -231,7 +231,10 @@ bot.action("download_ios", async (ctx) => {
       );
       await ctx.answerCbQuery();
     } else {
-      await ctx.reply(`📲 Tap the link below to download the 1MAX iOS app:\n\n${IOS_URL}`, opts);
+      await ctx.reply(
+        `📲 Tap the link below to download the 1MAX iOS app:\n\n${IOS_URL}`,
+        opts
+      );
     }
   } catch (err) {
     console.error("download_ios handler failed:", err?.message || err);
