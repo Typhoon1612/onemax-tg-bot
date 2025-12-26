@@ -150,7 +150,7 @@ async function check1hPriceChange() {
     // console.log(line);
     // lines.push(line);
 
-    if (!Number.isNaN(p1hNum) && (p1hNum >= 5 || p1hNum <= -5)) {
+    if (!Number.isNaN(p1hNum) && (p1hNum >= 20 || p1hNum <= -20)) {
       const extra = `${symbol}: 1h change is positive: ${p1hStr} the price now is ${priceStr}`;
       console.log(extra);
       lines.push(extra);
@@ -193,7 +193,7 @@ async function post24hPriceChange() {
     t.percent_change_24h !== null &&
     t.percent_change_24h !== undefined &&
     !Number.isNaN(Number(t.percent_change_24h))
-      ? `${Number(t.percent_change_24h).toFixed(2)}%`
+      ? `${Number(t.percent_change_24h)}%`
       : "N/A";
 
   console.log(`${symbol}: 24h change is ${p24Str}`);
