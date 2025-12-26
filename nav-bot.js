@@ -407,10 +407,14 @@ process.once("SIGTERM", async () => {
   }
 });
 
-// Start bot in polling mode for local testing
-bot
-  .launch()
-  .then(() => console.log("Bot running in polling mode ✓"))
-  .catch((err) => console.error("Failed to start bot:", err));
+// Start bot in polling mode only when this file is run directly.
+// When imported (require('./nav-bot')) the outer server (`index.js`) will
+// control webhook registration or polling to avoid conflicts.
+if (require.main === module) {
+  bot
+    .launch()
+    .then(() => console.log("Bot running in polling mode ✓"))
+    .catch((err) => console.error("Failed to start bot:", err));
+}
 
 module.exports = bot;
