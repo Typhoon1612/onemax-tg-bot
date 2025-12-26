@@ -7,21 +7,18 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 // /start command
 bot.start((ctx) => {
   try {
-    ctx.reply(`📲 /download – Get the 1MAX app
+    ctx.reply(`Welcome to the 1MAX Mini App!😁
 
+Press or type to get started:
+📲 /download – Get the 1MAX app (Android & iOS)
 🎯 /quest – Complete quests & earn rewards
-
 📝 /register – Create your 1MAX account
-
 💰 /deposit – Deposit funds to start trading
-
 💬 /discord – Join our Discord community
+🛠 /support – Get help, support, or partnership info
+❓/help – Show available commands
 
-🤝 /support – Get help, support, or partnership info
-
-❓ /help – Show available commands
-
-👉 Tap “Launch” to start trading on 1MAX`);
+👉 Tap “Launch” to start trading on 1MAX😄`);
   } catch (err) {
     console.error("Failed to reply to /start:", err?.message || err);
   }
@@ -164,7 +161,7 @@ bot.command("download", (ctx) => {
   };
 
   try {
-    ctx.reply("Select your device👇:", keyboard);
+    ctx.reply("Select your device👇", keyboard);
   } catch (err) {
     console.error(
       "Failed to send download options:",
