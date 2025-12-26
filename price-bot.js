@@ -142,7 +142,7 @@ async function check1hPriceChange() {
     }
 
     const p1hNum = Number(t.percent_change_1h);
-    const priceStr = t.price ? `$${t.price.toFixed(2)}` : "N/A";
+    const priceStr = t.price ? `$${t.price}` : "N/A";
 
     if (Number.isNaN(p1hNum)) {
       // no valid percent change
@@ -208,7 +208,7 @@ async function post24hPriceChange() {
     return;
   }
   const p24Num = Number(t.percent_change_24h);
-  const priceStr = t.price ? `$${t.price.toFixed(2)}` : "N/A";
+  const priceStr = t.price ? `$${t.price}` : "N/A";
 
   if (Number.isNaN(p24Num)) {
     console.log(`${symbol}: 24h change is N/A`);
@@ -218,7 +218,7 @@ async function post24hPriceChange() {
   const p24Fixed = p24Num.toFixed(2);
 
   // Negative major move
-  if (p24Num <= -20) {
+  if (p24Num <= 0) {
     const msg = `MAJOR PRICE MOVE🚨\n\n➤ ${t.symbol}\nPrice: ${priceStr}\n24H Change: 🔴 ${p24Fixed}%`;
     console.log(msg);
     try {
