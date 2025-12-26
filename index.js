@@ -38,8 +38,25 @@ app.listen(PORT, async () => {
   try {
     // remove any existing webhook and set the new one
     await navBot.telegram.deleteWebhook();
-    await navBot.telegram.setWebhook(webhookUrl);
-    console.log("Webhook set to", webhookUrl);
+    try {
+      await navBot.telegram.setWebhook(webhookUrl);
+      console.log("Webhook set to", webhookUrl);
+    } catch (err) {
+      // Handle conflict when another instance set the webhook concurrently
+      const code = err && err.response && err.response.error_code;
+      if (code === 409) {
+        console.warn("setWebhook conflict (409). Deleting existing webhook and retrying...");
+        try {
+          await navBot.telegram.deleteWebhook({ drop_pending_updates: true });
+          await navBot.telegram.setWebhook(webhookUrl);
+          console.log("Webhook set to", webhookUrl, "(retry)");
+        } catch (retryErr) {
+          console.error("Failed to set webhook on retry:", retryErr);
+        }
+      } else {
+        throw err;
+      }
+    }
   } catch (err) {
     console.error("Failed to set webhook:", err);
   }
