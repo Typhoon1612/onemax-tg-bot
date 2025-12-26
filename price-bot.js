@@ -142,22 +142,40 @@ async function check1hPriceChange() {
     }
 
     const p1hNum = Number(t.percent_change_1h);
-    const p1hStr = !Number.isNaN(p1hNum) ? `${p1hNum.toFixed(2)}%` : "N/A";
-
     const priceStr = t.price ? `$${t.price.toFixed(2)}` : "N/A";
 
-    // const line = `${symbol}: ${priceStr} | 1h: ${p1hStr}`;
-    // console.log(line);
-    // lines.push(line);
-
-    if (!Number.isNaN(p1hNum) && (p1hNum >= 20 || p1hNum <= -20)) {
-      const extra = `${symbol}: 1h change is positive: ${p1hStr} the price now is ${priceStr}`;
-      console.log(extra);
-      lines.push(extra);
-      continue;
-    } else {
+    if (Number.isNaN(p1hNum)) {
+      // no valid percent change
       continue;
     }
+
+    const p1hFixed = p1hNum.toFixed(2);
+
+    // Build message according to severity / direction
+    if (p1hNum <= -1) {
+      const msg = `MAJOR PRICE MOVE🚨\n\n➤ ${t.symbol}\nPrice: ${priceStr}\n1H Change: 🔴 ${p1hFixed}%`;
+      console.log(msg);
+      lines.push(msg);
+      continue;
+    }
+
+    if (p1hNum === 0) {
+      const msg = `1MAX Market Update📊\n\n➤ ${t.symbol}\nPrice: ${priceStr}\n1H Change: ⚪️ ${p1hFixed}%`;
+      console.log(msg);
+      lines.push(msg);
+      continue;
+    }
+
+    if (p1hNum >= 1) {
+      const sign = p1hNum > 0 ? `+${p1hFixed}` : p1hFixed;
+      const msg = `1MAX Market Update📊\n\n➤ ${t.symbol}\nPrice: ${priceStr}\n1H Change: 🟢 ${sign}%`;
+      console.log(msg);
+      lines.push(msg);
+      continue;
+    }
+
+    // otherwise no noteworthy move
+    continue;
   }
 
   // Send summary to Telegram if configured
@@ -189,27 +207,64 @@ async function post24hPriceChange() {
     console.log(`${symbol}: no data`);
     return;
   }
-  const p24Str =
-    t.percent_change_24h !== null &&
-    t.percent_change_24h !== undefined &&
-    !Number.isNaN(Number(t.percent_change_24h))
-      ? `${Number(t.percent_change_24h)}%`
-      : "N/A";
+  const p24Num = Number(t.percent_change_24h);
+  const priceStr = t.price ? `$${t.price.toFixed(2)}` : "N/A";
 
-  console.log(`${symbol}: 24h change is ${p24Str}`);
-
-  // Send summary to Telegram if configured
-  try {
-    if (bot && CHAT_ID) {
-      const msg = `${symbol}: 24h change is ${p24Str}`;
-      await bot.telegram.sendMessage(CHAT_ID, msg);
-    }
-  } catch (err) {
-    console.error(
-      "Failed to send 24h summary to Telegram:",
-      err?.response?.description || err?.message || err
-    );
+  if (Number.isNaN(p24Num)) {
+    console.log(`${symbol}: 24h change is N/A`);
+    return;
   }
+
+  const p24Fixed = p24Num.toFixed(2);
+
+  // Negative major move
+  if (p24Num <= -20) {
+    const msg = `MAJOR PRICE MOVE🚨\n\n➤ ${t.symbol}\nPrice: ${priceStr}\n24H Change: 🔴 ${p24Fixed}%`;
+    console.log(msg);
+    try {
+      if (bot && CHAT_ID) await bot.telegram.sendMessage(CHAT_ID, msg);
+    } catch (err) {
+      console.error(
+        "Failed to send 24h summary to Telegram:",
+        err?.response?.description || err?.message || err
+      );
+    }
+    return;
+  }
+
+  // No change
+  if (p24Num === 0) {
+    const msg = `1MAX Market Update📊\n\n➤ ${t.symbol}\nPrice: ${priceStr}\n24H Change: ⚪️ ${p24Fixed}%`;
+    console.log(msg);
+    try {
+      if (bot && CHAT_ID) await bot.telegram.sendMessage(CHAT_ID, msg);
+    } catch (err) {
+      console.error(
+        "Failed to send 24h summary to Telegram:",
+        err?.response?.description || err?.message || err
+      );
+    }
+    return;
+  }
+
+  // Positive major move
+  if (p24Num >= 20) {
+    const sign = p24Num > 0 ? `+${p24Fixed}` : p24Fixed;
+    const msg = `1MAX Market Update📊\n\n➤ ${t.symbol}\nPrice: ${priceStr}\n24H Change: 🟢 ${sign}%`;
+    console.log(msg);
+    try {
+      if (bot && CHAT_ID) await bot.telegram.sendMessage(CHAT_ID, msg);
+    } catch (err) {
+      console.error(
+        "Failed to send 24h summary to Telegram:",
+        err?.response?.description || err?.message || err
+      );
+    }
+    return;
+  }
+
+  // Not a noteworthy move — just log it
+  console.log(`${symbol}: 24h change is ${p24Fixed}%`);
 }
 
 // --- CLI / direct-run behavior ----------------------------------------
