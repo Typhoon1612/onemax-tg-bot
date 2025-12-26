@@ -7,18 +7,21 @@ const bot = new Telegraf(process.env.BOT_TOKEN);
 // /start command
 bot.start((ctx) => {
   try {
-    ctx.reply(`Welcome to the 1MAX Mini App!😁
+    ctx.reply(`📲 /download – Get the 1MAX app
 
-Press or type to get started:
-📲 /download – Get the 1MAX app (Android & iOS)
 🎯 /quest – Complete quests & earn rewards
-📝 /register – Create your 1MAX account
-💰 /deposit – Deposit funds to start trading
-💬 /discord – Join our Discord community
-🛠 /support – Get help, support, or partnership info
-❓/help – Show available commands
 
-👉 Tap “Launch” to start trading on 1MAX😄`);
+📝 /register – Create your 1MAX account
+
+💰 /deposit – Deposit funds to start trading
+
+💬 /discord – Join our Discord community
+
+🤝 /support – Get help, support, or partnership info
+
+❓ /help – Show available commands
+
+👉 Tap “Launch” to start trading on 1MAX`);
   } catch (err) {
     console.error("Failed to reply to /start:", err?.message || err);
   }
@@ -33,7 +36,7 @@ bot.command("register", (ctx) => {
   const registerUrl = `https://www.1max.com/en_US/register`;
 
   try {
-    ctx.reply("Sign up on 1MAX", {
+    ctx.reply("Sign up on 1MAX👇", {
       reply_markup: {
         inline_keyboard: [
           [{ text: "Click to Register", web_app: { url: registerUrl } }],
@@ -91,7 +94,7 @@ bot.command("deposit", (ctx) => {
     ctx.reply("Deposit funds to begin trading on 1MAX 👇", {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "Start Deposit", web_app: { url: depositUrl } }],
+          [{ text: "Deposit Now", web_app: { url: depositUrl } }],
         ],
       },
     });
@@ -161,7 +164,7 @@ bot.command("download", (ctx) => {
   };
 
   try {
-    ctx.reply("Install our apps today:", keyboard);
+    ctx.reply("Select your device👇:", keyboard);
   } catch (err) {
     console.error(
       "Failed to send download options:",
@@ -192,13 +195,13 @@ bot.action("download_android", async (ctx) => {
 
     if (ctx.updateType === "callback_query") {
       await ctx.editMessageText(
-        `This is your Android Download Link\n${ANDROID_URL}`,
+        `📲 Tap the link below to download the 1MAX Android app:\n\n${ANDROID_URL}`,
         opts
       );
       await ctx.answerCbQuery();
     } else {
       await ctx.reply(
-        `This is your Android Download Link\n${ANDROID_URL}`,
+        `📲 Tap the link below to download the 1MAX Android app:\n\n${ANDROID_URL}`,
         opts
       );
     }
@@ -223,12 +226,12 @@ bot.action("download_ios", async (ctx) => {
 
     if (ctx.updateType === "callback_query") {
       await ctx.editMessageText(
-        `This is your iOS Download Link\n${IOS_URL}`,
+        `📲 Tap the link below to download the 1MAX iOS app:\n\n${IOS_URL}`,
         opts
       );
       await ctx.answerCbQuery();
     } else {
-      await ctx.reply(`This is your iOS Download Link\n${IOS_URL}`, opts);
+      await ctx.reply(`📲 Tap the link below to download the 1MAX iOS app:\n\n${IOS_URL}`, opts);
     }
   } catch (err) {
     console.error("download_ios handler failed:", err?.message || err);
