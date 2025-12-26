@@ -39,7 +39,7 @@ bot.command("register", (ctx) => {
     ctx.reply("Sign up on 1MAX👇", {
       reply_markup: {
         inline_keyboard: [
-          [{ text: "Click to Register", web_app: { url: registerUrl } }],
+          [{ text: "Register Now", web_app: { url: registerUrl } }],
         ],
       },
     });
@@ -277,15 +277,20 @@ bot.command("help", (ctx) => {
 
   try {
     ctx.reply(`Press or type to get started:
-📲 /download – Get the 1MAX app (Android & iOS)
-🎯 /quest – Complete quests & earn rewards
-📝 /register – Create your 1MAX account
-💰 /deposit – Deposit funds to start trading
-💬 /discord – Join our Discord community
-🛠 /support – Get help, support, or partnership info
-❓ /help – Show available commands
 
-👉 Tap “Launch” to start trading on 1MAX😄`);
+📲 /download – Get the 1MAX app
+
+🎯 /quest – Complete quests & earn rewards
+
+📝 /register – Create your 1MAX account
+
+💰 /deposit – Deposit funds to start trading
+
+💬 /discord – Join our Discord community
+
+🤝 /support – Get help, support, or partnership info 
+
+👉 Tap “Launch” to start trading on 1MAX`);
   } catch (err) {
     console.error("Failed to reply to /help:", err?.message || err);
   }
