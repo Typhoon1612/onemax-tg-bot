@@ -36,45 +36,10 @@ app.listen(PORT, async () => {
 
   const webhookUrl = `${PUBLIC_URL}${PATH}`;
   try {
-    // Quick reachability test: ensure Telegram API is reachable using the
-    // current bot token. If this fails (ETIMEDOUT or other network error),
-    // fall back to polling mode instead of repeatedly trying to set webhooks.
-    try {
-      await navBot.telegram.getMe();
-    } catch (reachErr) {
-      console.error("Failed to contact Telegram API:", reachErr?.message || reachErr);
-      console.log("Falling back to polling mode (webhooks unavailable).");
-      try {
-        await navBot.launch();
-        console.log("Bot started in polling mode ✓");
-      } catch (launchErr) {
-        console.error("Failed to start bot in polling mode:", launchErr?.message || launchErr);
-      }
-      return; // skip webhook registration when polling
-    }
     // remove any existing webhook and set the new one
     await navBot.telegram.deleteWebhook();
-    try {
-      await navBot.telegram.setWebhook(webhookUrl);
-      console.log("Webhook set to", webhookUrl);
-    } catch (err) {
-      // Handle conflict when another instance set the webhook concurrently
-      const code = err && err.response && err.response.error_code;
-      if (code === 409) {
-        console.warn(
-          "setWebhook conflict (409). Deleting existing webhook and retrying..."
-        );
-        try {
-          await navBot.telegram.deleteWebhook({ drop_pending_updates: true });
-          await navBot.telegram.setWebhook(webhookUrl);
-          console.log("Webhook set to", webhookUrl, "(retry)");
-        } catch (retryErr) {
-          console.error("Failed to set webhook on retry:", retryErr);
-        }
-      } else {
-        throw err;
-      }
-    }
+    await navBot.telegram.setWebhook(webhookUrl);
+    console.log("Webhook set to", webhookUrl);
   } catch (err) {
     console.error("Failed to set webhook:", err);
   }
