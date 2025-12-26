@@ -45,7 +45,9 @@ app.listen(PORT, async () => {
       // Handle conflict when another instance set the webhook concurrently
       const code = err && err.response && err.response.error_code;
       if (code === 409) {
-        console.warn("setWebhook conflict (409). Deleting existing webhook and retrying...");
+        console.warn(
+          "setWebhook conflict (409). Deleting existing webhook and retrying..."
+        );
         try {
           await navBot.telegram.deleteWebhook({ drop_pending_updates: true });
           await navBot.telegram.setWebhook(webhookUrl);
