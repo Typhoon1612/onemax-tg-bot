@@ -123,6 +123,26 @@ async function fetchCryptoToken(symbol) {
   }
 }
 
+// Format price for display:
+// - If the value is an integer, show it without decimals (e.g. 100)
+// - If the value is >= 0.01 show 2 decimal places (e.g. 12.34)
+// - If the value is < 0.01 show up to 8 decimals (trim trailing zeros)
+function formatPrice(value) {
+  if (value === null || value === undefined) return "N/A";
+  const n = Number(value);
+  if (Number.isNaN(n)) return "N/A";
+
+  // Integer -> show full integer
+  if (Number.isInteger(n)) return `$${n}`;
+
+  // Normal prices -> 2 decimals
+  if (Math.abs(n) >= 0.01) return `$${n.toFixed(2)}`;
+
+  // Very small prices -> show up to 8 decimals, trim trailing zeros
+  const s = n.toFixed(8).replace(/(?:\.0+|0+)$/g, "");
+  return `$${s}`;
+}
+
 async function check1hPriceChange() {
   const lines = [];
   for (const symbol of cryptoSymbols) {
@@ -142,7 +162,7 @@ async function check1hPriceChange() {
     }
 
     const p1hNum = Number(t.percent_change_1h);
-    const priceStr = t.price ? `$${t.price}` : "N/A";
+    const priceStr = t.price ? formatPrice(t.price) : "N/A";
 
     if (Number.isNaN(p1hNum)) {
       // no valid percent change
@@ -208,7 +228,7 @@ async function post24hPriceChange() {
     return;
   }
   const p24Num = Number(t.percent_change_24h);
-  const priceStr = t.price ? `$${t.price}` : "N/A";
+  const priceStr = t.price ? formatPrice(t.price) : "N/A";
 
   if (Number.isNaN(p24Num)) {
     console.log(`${symbol}: 24h change is N/A`);
