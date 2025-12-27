@@ -172,7 +172,7 @@ async function check1hPriceChange() {
     const p1hFixed = p1hNum.toFixed(2);
 
     // Build message according to severity / direction
-    if (p1hNum <= -1) {
+    if (p1hNum <= -20) {
       const msg = `MAJOR PRICE MOVE🚨\n\n➤ ${t.symbol}\nPrice: ${priceStr}\n1H Change: 🔴 ${p1hFixed}%`;
       console.log(msg);
       lines.push(msg);
@@ -186,7 +186,7 @@ async function check1hPriceChange() {
       continue;
     }
 
-    if (p1hNum >= 1) {
+    if (p1hNum >= 20) {
       const sign = p1hNum > 0 ? `+${p1hFixed}` : p1hFixed;
       const msg = `1MAX Market Update📊\n\n➤ ${t.symbol}\nPrice: ${priceStr}\n1H Change: 🟢 ${sign}%`;
       console.log(msg);
