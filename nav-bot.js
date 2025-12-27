@@ -10,17 +10,11 @@ bot.start((ctx) => {
     ctx.reply(`Press or type to get started:
 
 📲 /download – Get the 1MAX app
-
 🎯 /quest – Complete quests & earn rewards
-
 📝 /register – Create your 1MAX account
-
 💰 /deposit – Deposit funds to start trading
-
 💬 /discord – Join our Discord community
-
 🤝 /support – Get help, support, or partnership info 
-
 ❓ /help – Show available actions
 
 👉 Tap “Launch” to start trading on 1MAX`);
@@ -281,16 +275,12 @@ bot.command("help", (ctx) => {
     ctx.reply(`Press or type to get started:
 
 📲 /download – Get the 1MAX app
-
 🎯 /quest – Complete quests & earn rewards
-
 📝 /register – Create your 1MAX account
-
 💰 /deposit – Deposit funds to start trading
-
 💬 /discord – Join our Discord community
-
 🤝 /support – Get help, support, or partnership info 
+❓ /help – Show available actions
 
 👉 Tap “Launch” to start trading on 1MAX`);
   } catch (err) {
